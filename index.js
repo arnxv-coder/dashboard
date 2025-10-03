@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 const PORT = process.env.PORT || 3000;
 
-// --- Basic Status API ---
+// Status API
 app.get("/api/status", async (req, res) => {
   try {
     const cpu = await si.currentLoad();
@@ -25,7 +25,7 @@ app.get("/api/status", async (req, res) => {
   }
 });
 
-// --- Network Stats API ---
+// Network API
 app.get("/api/network", async (req, res) => {
   try {
     const net = await si.networkStats();
@@ -35,7 +35,7 @@ app.get("/api/network", async (req, res) => {
   }
 });
 
-// --- Mock HTTP Requests API ---
+// HTTP Requests API (mock)
 app.get("/api/http", (req, res) => {
   res.json({
     "200": Math.floor(Math.random() * 100),
@@ -44,12 +44,20 @@ app.get("/api/http", (req, res) => {
   });
 });
 
-// --- Top Processes API ---
+// Top Processes API
 app.get("/api/processes", async (req, res) => {
   const processes = await si.processes();
-  // sort by CPU usage
   const top = processes.list.sort((a, b) => b.cpu - a.cpu).slice(0, 5);
   res.json(top.map(p => ({ name: p.name, cpu: p.cpu.toFixed(2), mem: p.mem.toFixed(2) })));
+});
+
+// Logs API (mock logs)
+app.get("/api/logs", (req, res) => {
+  const logs = [];
+  for(let i=0; i<50; i++) {
+    logs.push({ time: new Date().toLocaleTimeString(), message: `Log entry ${i+1}` });
+  }
+  res.json(logs);
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
