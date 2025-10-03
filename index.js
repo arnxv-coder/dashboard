@@ -35,29 +35,44 @@ app.get("/api/network", async (req, res) => {
   }
 });
 
-// HTTP Requests API (mock)
+// HTTP Requests API (mock data)
 app.get("/api/http", (req, res) => {
   res.json({
-    "200": Math.floor(Math.random() * 100),
-    "400": Math.floor(Math.random() * 10),
-    "500": Math.floor(Math.random() * 5)
+    "200": Math.floor(Math.random() * 200),
+    "400": Math.floor(Math.random() * 20),
+    "500": Math.floor(Math.random() * 10)
   });
 });
 
-// Top Processes API
-app.get("/api/processes", async (req, res) => {
+// Connections & Processes
+app.get("/api/connections", async (req, res) => {
   const processes = await si.processes();
-  const top = processes.list.sort((a, b) => b.cpu - a.cpu).slice(0, 5);
-  res.json(top.map(p => ({ name: p.name, cpu: p.cpu.toFixed(2), mem: p.mem.toFixed(2) })));
+  const active = processes.list.filter(p => p.cpu > 0);
+  res.json({
+    activeConnections: active.length,
+    topProcesses: active.sort((a, b) => b.cpu - a.cpu).slice(0, 5).map(p => ({
+      name: p.name,
+      cpu: p.cpu.toFixed(2),
+      mem: p.mem.toFixed(2)
+    }))
+  });
 });
 
-// Logs API (mock logs)
+// Optional custom API (Minecraft / bot stats)
+app.get("/api/custom", (req, res) => {
+  res.json({
+    minecraftPlayers: Math.floor(Math.random() * 10),
+    botStatus: "Online"
+  });
+});
+
+// Logs (mock)
 app.get("/api/logs", (req, res) => {
   const logs = [];
-  for(let i=0; i<50; i++) {
+  for (let i = 0; i < 50; i++) {
     logs.push({ time: new Date().toLocaleTimeString(), message: `Log entry ${i+1}` });
   }
   res.json(logs);
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
